@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stats-service
+  namespace: prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: stats-service
+  template:
+    metadata:
+      labels:
+        app: stats-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/stats/actuator/prometheus"
+        prometheus.io/port: "8082"
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: role
+                    operator: In
+                    values:
+                      - app
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - stats-service
+                topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: stats-service
+          image: your-docker-user/todo-backend-stats:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8082
+          env:
+            - name: TODO_SERVICE_URL
+              value: "http://todo-service:8080/todos"
+            - name: USER_SERVICE_URL
+              value: "http://user-service:8081/users"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /stats/actuator/health
+              port: 8082
+            initialDelaySeconds: 20
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stats-service
+  namespace: prod
+spec:
+  type: ClusterIP
+  selector:
+    app: stats-service
+  ports:
+    - port: 8082
+      targetPort: 8082

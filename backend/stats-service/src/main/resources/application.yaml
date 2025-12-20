@@ -1,0 +1,26 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /stats
+
+spring:
+  application:
+    name: stats-service
+
+# Configuration for calling other microservices
+microservices:
+  todo-service:
+    url: ${TODO_SERVICE_URL:http://localhost:8080/todos}
+  user-service:
+    url: ${USER_SERVICE_URL:http://localhost:8081/users}
+
+# Actuator configuration for Prometheus metrics
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,health,info,metrics
+  metrics:
+    export:
+      prometheus:
+        enabled: true
