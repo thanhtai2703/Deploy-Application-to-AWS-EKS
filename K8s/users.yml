@@ -40,7 +40,7 @@ spec:
                 topologyKey: "kubernetes.io/hostname"
       containers:
         - name: user-service
-          image: your-docker-user/todo-backend-users:latest
+          image: taithanh/todo-backend-users:4aa2581176a2fa5a6840be2adac332a1d351a196
           imagePullPolicy: Always
           ports:
             - containerPort: 8081
