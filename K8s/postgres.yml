@@ -48,8 +48,10 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: POSTGRES_PASSWORD
+            # FIX: Use a subdirectory to avoid 'lost+found' error
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
             # Init script will handle DB creation, or we can use a simpler approach
-            # Since we are using a single Postgres instance for both DBs in this plan:
             - name: POSTGRES_DB
               value: postgres 
               # We will rely on an init script to create todo_db and user_db, 
@@ -71,7 +73,7 @@ spec:
         name: postgres-data
       spec:
         accessModes: ["ReadWriteOnce"]
-        # storageClassName: "gp2" # Standard AWS EBS class (often default)
+        storageClassName: "gp2-csi"
         resources:
           requests:
             storage: 2Gi
