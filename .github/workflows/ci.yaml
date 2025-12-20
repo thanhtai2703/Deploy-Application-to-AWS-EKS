@@ -2,16 +2,11 @@ name: Microservices Build & Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths-ignore:
-<<<<<<< HEAD
       - "K8s/**"
       - "README.md"
       - "EKS-TF/**"
-=======
-      - "k8s/**"
->>>>>>> 8e93dcbbfd450852306c35b34836b89255c2118b
-
 jobs:
   # Job 1: Build and Push Docker Images (Parallel Matrix)
   build-push:
@@ -44,16 +39,10 @@ jobs:
       - name: Build and Push ${{ matrix.service.name }}
         uses: docker/build-push-action@v4
         with:
-<<<<<<< HEAD
           context: ${{ matrix.service.context }}
-=======
-          context: ./app # Đường dẫn đến folder chứa Dockerfile
-          file: ./app/Dockerfile
->>>>>>> 8e93dcbbfd450852306c35b34836b89255c2118b
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service.image }}:${{ github.sha }}
 
-<<<<<<< HEAD
   # Job 2: Update Kubernetes Manifests (Runs after all builds succeed)
   update-k8s:
     needs: build-push
@@ -63,43 +52,23 @@ jobs:
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GIT_TOKEN }}
-=======
-      # 4.Scan Image bằng Trivy
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: "${{ secrets.DOCKER_USERNAME }}/reddit:${{ github.sha }}"
-          format: "table"
-          exit-code: "0"
-          ignore-unfixed: true
-          vuln-type: "os,library"
-          severity: "CRITICAL,HIGH"
->>>>>>> 8e93dcbbfd450852306c35b34836b89255c2118b
-
       - name: Update Manifest Files
         run: |
           cd K8s
-<<<<<<< HEAD
-          
           # Docker Username from Secrets
           DOCKER_USER=${{ secrets.DOCKER_USERNAME }}
           TAG=${{ github.sha }}
-          
-          echo "Updating manifests with image tag: $TAG"
-=======
-          # Dùng lệnh sed để thay thế image cũ bằng image mới vừa build
-          sed -i "s|image: .*|image: ${{ secrets.DOCKER_USERNAME }}/reddit:${{ github.sha }}|g" deployment.yml
->>>>>>> 8e93dcbbfd450852306c35b34836b89255c2118b
 
+          echo "Updating manifests with image tag: $TAG"
           # 1. Update Frontend
           sed -i "s|image: .*todo-frontend:.*|image: $DOCKER_USER/todo-frontend:$TAG|g" frontend.yml
-          
+
           # 2. Update Backend - Todos
           sed -i "s|image: .*todo-backend-todos:.*|image: $DOCKER_USER/todo-backend-todos:$TAG|g" todos.yml
-          
+
           # 3. Update Backend - Users
           sed -i "s|image: .*todo-backend-users:.*|image: $DOCKER_USER/todo-backend-users:$TAG|g" users.yml
-          
+
           # 4. Update Backend - Stats
           sed -i "s|image: .*todo-backend-stats:.*|image: $DOCKER_USER/todo-backend-stats:$TAG|g" stats.yml
 
@@ -107,8 +76,7 @@ jobs:
         run: |
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'actions@github.com'
-<<<<<<< HEAD
-          
+
           # Check for changes before committing
           if [[ -n $(git status -s) ]]; then
             git add .
@@ -117,8 +85,3 @@ jobs:
           else
             echo "No changes to commit."
           fi
-=======
-          git add deployment.yml
-          git commit -m "Update image tag to ${{ github.sha }}"
-          git push
->>>>>>> 8e93dcbbfd450852306c35b34836b89255c2118b
