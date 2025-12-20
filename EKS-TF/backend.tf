@@ -1,9 +1,9 @@
 terraform {
   backend "s3" {
-    bucket         = "reddit-terraform-state-1967814591"
+    bucket         = "todo-terraform-state-1967814591"
     region         = "us-east-1"
-    key            = "reddit-project/EKS-TF/terraform.tfstate"
-    dynamodb_table = "reddit-terraform-locks"
+    key            = "todo-project/EKS-TF/terraform.tfstate"
+    dynamodb_table = "todo-terraform-locks"
     encrypt        = true
   }
   required_version = ">=0.13.0"

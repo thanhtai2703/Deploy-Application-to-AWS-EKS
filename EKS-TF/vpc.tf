@@ -32,7 +32,7 @@ resource "aws_subnet" "public-subnet" {
 
 # Create security group
 resource "aws_security_group" "sg-default" {
-  name_prefix = "reddit-eks-sg"
+  name_prefix = "todo-eks-sg"
   vpc_id      = aws_vpc.vpc.id
 
   ingress {
@@ -70,7 +70,7 @@ resource "aws_route_table" "rt1" {
   }
 
   tags = {
-    Name = "Reddit-route-table1"
+    Name = "TodoApp-route-table1"
   }
 }
 
