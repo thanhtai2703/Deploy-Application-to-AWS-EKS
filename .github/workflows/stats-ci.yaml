@@ -2,39 +2,30 @@ name: CI - Stats Service
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
       - "backend/stats-service/**"
 
 jobs:
-  build-stats:
+  test-and-trigger:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GIT_TOKEN }}
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          java-version: "17"
+          distribution: "temurin"
+          cache: maven
 
-      - name: Build and Push
-        uses: docker/build-push-action@v4
-        with:
-          context: ./backend/stats-service
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/todo-backend-stats:${{ github.sha }}
+      - name: Build and Run Tests
+        run: mvn test
+        working-directory: backend/stats-service
 
-      - name: Trigger Tekton CD Pipeline
+      - name: Trigger Tekton Pipeline
         run: |
           curl -X POST http://${{ secrets.TEKTON_EL_URL }} \
             -H 'Content-Type: application/json' \
-            -d '{
-              "ref": "main",
-              "repository": {"url": "'"${{ secrets.REPO_URL }}"'"},
-              "service_name": "stats",
-              "action": "build-deploy"
-            }'
+            -d '{"repository": { "url": "https://github.com/thanhtai2703/Deploy-Application-to-AWS-EKS.git" }, "commit_sha": "${{ github.sha }}", "branch": "main", "service_name": "stats", "context_dir": "backend/stats-service", "manifest_file": "K8s/stats.yml", "image_repo": "stats-service" }'

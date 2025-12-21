@@ -1,40 +1,31 @@
-name: CI - Frontend
+name: CI - Frontend Service
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
       - "frontend/**"
 
 jobs:
-  build-frontend:
+  test-and-trigger:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GIT_TOKEN }}
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          node-version: "18"
 
-      - name: Build and Push
-        uses: docker/build-push-action@v4
-        with:
-          context: ./frontend
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/todo-frontend:${{ github.sha }}
+      - name: Install and Build
+        run: |
+          npm install
+          npm run build
+        working-directory: frontend
 
-      - name: Trigger Tekton CD Pipeline
+      - name: Trigger Tekton Pipeline
         run: |
           curl -X POST http://${{ secrets.TEKTON_EL_URL }} \
             -H 'Content-Type: application/json' \
-            -d '{
-              "ref": "main",
-              "repository": {"url": "'"${{ secrets.REPO_URL }}"'"},
-              "service_name": "frontend",
-              "action": "build-deploy"
-            }'
+            -d '{"repository": { "url": "https://github.com/thanhtai2703/Deploy-Application-to-AWS-EKS.git" }, "commit_sha": "${{ github.sha }}", "branch": "main", "service_name": "frontend", "context_dir": "frontend", "manifest_file": "K8s/frontend.yml", "image_repo": "todo-frontend" }'

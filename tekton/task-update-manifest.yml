@@ -1,0 +1,43 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: update-manifest
+  namespace: default
+spec:
+  params:
+    - name: image
+      description: The new image tag (e.g. harbor.internal/repo/img:tag)
+    - name: manifest-file
+      description: The path to the yaml file (e.g. K8s/todos.yml)
+  workspaces:
+    - name: source
+      description: The workspace containing the cloned repo (must have .git folder)
+  steps:
+    - name: update-yaml
+      image: alpine/git:latest
+      workingDir: $(workspaces.source.path)
+      script: |
+        #!/usr/bin/env sh
+        set -e
+        
+        echo "🔧 Updating manifest: $(params.manifest-file)"
+        echo "🖼️  New Image: $(params.image)"
+
+        # 1. The Logic: Replace the image line
+        # We use a regex to ensure we only catch the 'image:' key
+        sed -i "s|image: .*|image: $(params.image)|g" $(params.manifest-file)
+
+        # 2. Check diff
+        git diff
+
+        # 3. Commit & Push
+        # Note: This relies on the workspace already having git credentials
+        # (e.g. via an SSH key secret or .git-credentials file)
+        git config --global user.email "tekton@k8s.local"
+        git config --global user.name "Tekton Bot"
+        
+        git add $(params.manifest-file)
+        git commit -m "GitOps: Update image to $(params.image)"
+        
+        # We push to the current branch
+        git push origin HEAD
