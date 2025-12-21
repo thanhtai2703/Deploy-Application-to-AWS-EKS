@@ -61,7 +61,7 @@ function StatsDashboard() {
     } catch (error: any) {
       console.error('Error fetching stats:', error);
       setServiceStatus('offline');
-      setErrorMessage('⚠️ Stats Service is not responding.');
+      setErrorMessage('Stats Service is not responding.');
       setLoading(false);
     }
   };
