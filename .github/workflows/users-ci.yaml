@@ -49,7 +49,7 @@ jobs:
             -H 'Content-Type: application/json' \
             -d '{
               "ref": "main",
-              "repository": {"url":"${{ secrets.REPO_URL }}},
+              "repository": {"url": "'"${{ secrets.REPO_URL }}"'"},
               "service_name": "users",
               "action": "build-deploy"
             }'
