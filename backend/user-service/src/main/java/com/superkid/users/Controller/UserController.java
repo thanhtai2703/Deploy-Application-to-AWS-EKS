@@ -17,15 +17,15 @@ public class UserController {
     
     private final UserService userService;
 
-    @PostMapping("/user")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        try {
-            User createdUser = userService.createUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
-    }
+    // @PostMapping("/user")
+    // public ResponseEntity<User> createUser(@RequestBody User user) {
+    //     try {
+    //         User createdUser = userService.createUser(user);
+    //         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+    //     } catch (RuntimeException e) {
+    //         return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    //     }
+    // }
 
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {

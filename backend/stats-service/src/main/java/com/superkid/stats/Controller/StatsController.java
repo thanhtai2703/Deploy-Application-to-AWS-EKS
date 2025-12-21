@@ -29,6 +29,6 @@ public class StatsController {
 
     @GetMapping("/health")
     public ResponseEntity<String> health() {
-        return ResponseEntity.ok("Stats Service is running");
+        return ResponseEntity.ok("Stats Service is running V1");
     }
 }
