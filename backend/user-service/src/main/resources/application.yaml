@@ -29,8 +29,6 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
     database: postgresql
-
-# Actuator configuration for Prometheus metrics
 management:
   endpoints:
     web:
