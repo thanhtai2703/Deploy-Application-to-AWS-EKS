@@ -18,6 +18,8 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
+# --- PUBLIC SUBNETS ---
+
 # Create public subnet 1
 resource "aws_subnet" "public-subnet" {
   vpc_id                  = aws_vpc.vpc.id
@@ -26,12 +28,130 @@ resource "aws_subnet" "public-subnet" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name                     = var.subnet-name
-    "kubernetes.io/role/elb" = "1"
+    Name                                        = var.subnet-name
+    "kubernetes.io/role/elb"                    = "1"
+    "kubernetes.io/cluster/${var.cluster-name}" = "shared"
   }
 }
 
-# Create security group
+# Create public subnet 2
+resource "aws_subnet" "public-subnet2" {
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "us-east-1b"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name                                        = var.subnet-name2
+    "kubernetes.io/role/elb"                    = "1"
+    "kubernetes.io/cluster/${var.cluster-name}" = "shared"
+  }
+}
+
+# --- PRIVATE SUBNETS ---
+
+# Create private subnet 1
+resource "aws_subnet" "private-subnet" {
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = "10.0.3.0/24"
+  availability_zone       = "us-east-1a"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name                                        = "${var.subnet-name}-private"
+    "kubernetes.io/role/internal-elb"           = "1"
+    "kubernetes.io/cluster/${var.cluster-name}" = "shared"
+  }
+}
+
+# Create private subnet 2
+resource "aws_subnet" "private-subnet2" {
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = "10.0.4.0/24"
+  availability_zone       = "us-east-1b"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name                                        = "${var.subnet-name2}-private"
+    "kubernetes.io/role/internal-elb"           = "1"
+    "kubernetes.io/cluster/${var.cluster-name}" = "shared"
+  }
+}
+
+# --- NETWORKING (NAT GATEWAY) ---
+
+# Elastic IP for NAT Gateway
+resource "aws_eip" "nat" {
+  domain = "vpc"
+  tags = {
+    Name = "TodoApp-nat-eip"
+  }
+}
+
+# NAT Gateway (Lives in Public Subnet 1)
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public-subnet.id
+
+  tags = {
+    Name = "TodoApp-nat-gateway"
+  }
+
+  depends_on = [aws_internet_gateway.igw]
+}
+
+# --- ROUTING ---
+
+# Route Table for Public Subnets
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.vpc.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+
+  tags = {
+    Name = "TodoApp-public-rt"
+  }
+}
+
+# Associations for Public Subnets
+resource "aws_route_table_association" "public1" {
+  route_table_id = aws_route_table.public.id
+  subnet_id      = aws_subnet.public-subnet.id
+}
+
+resource "aws_route_table_association" "public2" {
+  route_table_id = aws_route_table.public.id
+  subnet_id      = aws_subnet.public-subnet2.id
+}
+
+# Route Table for Private Subnets (Through NAT)
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.vpc.id
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat.id
+  }
+
+  tags = {
+    Name = "TodoApp-private-rt"
+  }
+}
+
+# Associations for Private Subnets
+resource "aws_route_table_association" "private1" {
+  route_table_id = aws_route_table.private.id
+  subnet_id      = aws_subnet.private-subnet.id
+}
+
+resource "aws_route_table_association" "private2" {
+  route_table_id = aws_route_table.private.id
+  subnet_id      = aws_subnet.private-subnet2.id
+}
+
+# --- SECURITY GROUPS ---
+
 resource "aws_security_group" "sg-default" {
   name_prefix = "todo-eks-sg"
   vpc_id      = aws_vpc.vpc.id
@@ -58,6 +178,14 @@ resource "aws_security_group" "sg-default" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # Allow CD Listener Metrics
+  ingress {
+    from_port   = 9000
+    to_port     = 9000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -68,54 +196,4 @@ resource "aws_security_group" "sg-default" {
   tags = {
     Name = var.security-group-name
   }
-}
-
-# Create route table for subnet 1
-resource "aws_route_table" "rt1" {
-  vpc_id = aws_vpc.vpc.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
-  tags = {
-    Name = "TodoApp-route-table1"
-  }
-}
-
-# Associate route table with subnet 1
-resource "aws_route_table_association" "rt-association1" {
-  route_table_id = aws_route_table.rt1.id
-  subnet_id      = aws_subnet.public-subnet.id
-}
-
-# Create public subnet 2
-resource "aws_subnet" "public-subnet2" {
-  vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = "10.0.2.0/24"
-  availability_zone       = "us-east-1b"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name                     = var.subnet-name2
-    "kubernetes.io/role/elb" = "1"
-  }
-}
-
-# Create route table for subnet 2
-resource "aws_route_table" "rt2" {
-  vpc_id = aws_vpc.vpc.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
-  tags = {
-    Name = var.rt-name2
-  }
-}
-
-resource "aws_route_table_association" "rt-association2" {
-  route_table_id = aws_route_table.rt2.id
-  subnet_id      = aws_subnet.public-subnet2.id
 }
