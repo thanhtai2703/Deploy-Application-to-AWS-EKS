@@ -40,7 +40,7 @@ spec:
                 topologyKey: "kubernetes.io/hostname"
       containers:
         - name: user-service
-          image: taithanh/todo-backend-users:9e7d95b5e036c272df4b4a01da7c699b2db7df4d
+          image: taithanh/todo-backend-users:b3723ac64b4e9371ce405e65a3ee58eba0f37bbc
           imagePullPolicy: Always
           ports:
             - containerPort: 8081
