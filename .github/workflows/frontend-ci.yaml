@@ -47,4 +47,9 @@ jobs:
         run: |
           curl -X POST http://${{ secrets.TEKTON_EL_URL }} \
             -H 'Content-Type: application/json' \
-            -d '{"ref":"main","repository":{"url":"Hello"}}'
+            -d '{
+              "ref": "main",
+              "repository": {"url": "https://github.com/your-user/your-repo"},
+              "service_name": "frontend",
+              "action": "build-deploy"
+            }'
