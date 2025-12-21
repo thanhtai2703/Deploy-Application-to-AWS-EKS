@@ -20,9 +20,9 @@ public class User {
     
     private String fullName;
     
-    private String role; // 
+    private String role; // //
     
-    private String department; // 
+    private String department; // //
     
     private boolean active = true;
 }
