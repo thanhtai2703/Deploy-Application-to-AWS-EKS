@@ -20,9 +20,9 @@ public class User {
     
     private String fullName;
     
-    private String role; // "Developer", "Designer", "Manager", etc.
+    private String role; // 
     
-    private String department; // "Engineering", "Marketing", "Sales", etc.
+    private String department; // 
     
     private boolean active = true;
 }
