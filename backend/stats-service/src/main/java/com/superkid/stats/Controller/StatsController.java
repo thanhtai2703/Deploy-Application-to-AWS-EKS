@@ -17,15 +17,15 @@ public class StatsController {
 
     private final StatsService statsService;
 
-    // @GetMapping("/stats")
-    // public ResponseEntity<StatsResponse> getStats() {
-    //     try {
-    //         StatsResponse stats = statsService.getOverallStats();
-    //         return ResponseEntity.ok(stats);
-    //     } catch (Exception e) {
-    //         return ResponseEntity.status(503).build(); // Service Unavailable
-    //     }
-    // }
+    @GetMapping("/stats")
+    public ResponseEntity<StatsResponse> getStats() {
+        try {
+            StatsResponse stats = statsService.getOverallStats();
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            return ResponseEntity.status(503).build(); // Service Unavailable
+        }
+    }
 
     @GetMapping("/health")
     public ResponseEntity<String> health() {
