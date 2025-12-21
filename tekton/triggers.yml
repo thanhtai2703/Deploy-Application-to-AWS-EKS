@@ -43,6 +43,7 @@ spec:
         generateName: build-$(tt.params.service-name)-
         namespace: default
       spec:
+        serviceAccountName: pipeline
         pipelineRef:
           name: build-and-deploy-pipeline
         workspaces:
@@ -64,7 +65,8 @@ spec:
           - name: manifest-file
             value: $(tt.params.manifest-file)
           - name: image-name
-            value: harbor.harbor.svc.cluster.local/prod/$(tt.params.image-repo)
+            # The Internal NLB URL that Nodes can resolve
+            value: k8s-harbor-harborin-50f71dc812-1095c7cdcce3385c.elb.us-east-1.amazonaws.com/prod/$(tt.params.image-repo)
           - name: image-tag
             value: $(tt.params.commit-sha)
 
@@ -75,7 +77,7 @@ metadata:
   name: tekton-listener
   namespace: default
 spec:
-  serviceAccountName: default
+  serviceAccountName: pipeline
   triggers:
     - name: github-trigger
       bindings:

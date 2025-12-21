@@ -14,10 +14,10 @@ import java.util.List;
 public class TodoController {
     private final TodoService todoService;
 
-    // @PostMapping("/todo")
-    // public Todo postTodo(@RequestBody Todo todo) {
-    //     return todoService.postTodo(todo);
-    // }
+    @PostMapping("/todo")
+    public Todo postTodo(@RequestBody Todo todo) {
+        return todoService.postTodo(todo);
+    }
 
     @GetMapping("/list-todo")
     public List<Todo> listTodo() {
