@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: todo-microservices-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    # --- UPDATE THIS TO YOUR REPO URL ---
+    repoURL: <YOUR_GITHUB_REPO_URL>
+    targetRevision: HEAD
+    path: K8s
+  destination:
+    server: https://kubernetes.default.svc
+    # Since our YAMLs define namespaces (prod/databases), 
+    # we can set a default here but the YAMLs will override.
+    namespace: default 
+  syncPolicy:
+    automated:
+      prune: true     # Automatically delete old resources
+      selfHeal: true  # Correct manual changes back to Git state
+    syncOptions:
+      - CreateNamespace=true
