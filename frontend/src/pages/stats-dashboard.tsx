@@ -136,8 +136,7 @@ function StatsDashboard() {
               ⚠️ User Service đang không khả dụng
             </p>
             <p className="text-yellow-700 text-sm mt-1">
-              Stats Service vẫn hoạt động và hiển thị thống kê Todos. Chỉ có
-              thông tin Users tạm thời không khả dụng.
+              Stats Service vẫn hoạt động và hiển thị thống kê Todo
             </p>
           </div>
         </div>
