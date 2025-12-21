@@ -49,7 +49,7 @@ spec:
               topologyKey: "kubernetes.io/hostname"
       containers:
         - name: frontend
-          image: taithanh/todo-frontend:afd66347df9be44444abdf456a8debab69f6e683
+          image: taithanh/todo-frontend:9e7d95b5e036c272df4b4a01da7c699b2db7df4d
           ports:
             - containerPort: 80
           resources:
