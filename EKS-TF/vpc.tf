@@ -26,8 +26,9 @@ resource "aws_subnet" "public-subnet" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name                     = var.subnet-name
-    "kubernetes.io/role/elb" = "1"
+    Name                                        = var.subnet-name
+    "kubernetes.io/role/elb"                    = "1"
+    "kubernetes.io/cluster/${var.cluster-name}" = "shared"
   }
 }
 
@@ -54,6 +55,13 @@ resource "aws_security_group" "sg-default" {
   ingress {
     from_port   = 8080
     to_port     = 8082
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 9000
+    to_port     = 9000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -97,8 +105,9 @@ resource "aws_subnet" "public-subnet2" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name                     = var.subnet-name2
-    "kubernetes.io/role/elb" = "1"
+    Name                                        = var.subnet-name2
+    "kubernetes.io/role/elb"                    = "1"
+    "kubernetes.io/cluster/${var.cluster-name}" = "shared"
   }
 }
 
