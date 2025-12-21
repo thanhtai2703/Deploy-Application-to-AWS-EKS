@@ -40,7 +40,7 @@ spec:
                 topologyKey: "kubernetes.io/hostname"
       containers:
         - name: stats-service
-          image: taithanh/todo-backend-stats:b3723ac64b4e9371ce405e65a3ee58eba0f37bbc
+          image: taithanh/todo-backend-stats:5aa65e44e2859f907ae947e6f11d3965e3db22ae
           imagePullPolicy: Always
           ports:
             - containerPort: 8082
