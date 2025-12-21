@@ -16,7 +16,7 @@ kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -
 
 # 4. Expose ArgoCD via LoadBalancer
 echo "Exposing ArgoCD server via LoadBalancer..."
-kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+kubectl patch svc argocd-server -n argocd -p '{"metadata": {"annotations": {"service.beta.kubernetes.io/aws-load-balancer-scheme": "internet-facing"}}, "spec": {"type": "LoadBalancer"}}'
 
 # 5. Retrieve Access Information
 echo "------------------------------------------------------------"
