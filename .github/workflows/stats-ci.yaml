@@ -28,21 +28,6 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/todo-backend-stats:${{ github.sha }}
 
-      - name: Update K8s Manifest
-        run: |
-          cd K8s
-          sed -i "s|image: .*todo-backend-stats:.*|image: ${{ secrets.DOCKER_USERNAME }}/todo-backend-stats:${{ github.sha }}|g" stats.yml
-          
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'actions@github.com'
-          
-          if [[ -n $(git status -s) ]]; then
-            git add stats.yml
-            git commit -m "Deploy: Update Stats Service image to ${{ github.sha }}"
-            git push
-          else
-            echo "No changes to commit."
-          fi
       - name: Trigger Tekton CD Pipeline
         run: |
           curl -X POST http://${{ secrets.TEKTON_EL_URL }} \
