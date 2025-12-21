@@ -4,11 +4,63 @@ metadata:
   name: todo-ingress
   namespace: prod
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/healthcheck-path: /
 spec:
+  ingressClassName: alb
   rules:
     - http:
         paths:
+          # --- API Routes ---
+          - path: /todos/api
+            pathType: Prefix
+            backend:
+              service:
+                name: todo-service
+                port:
+                  number: 8080
+          - path: /todos/actuator
+            pathType: Prefix
+            backend:
+              service:
+                name: todo-service
+                port:
+                  number: 8080
+
+          - path: /users/api
+            pathType: Prefix
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 8081
+          - path: /users/actuator
+            pathType: Prefix
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 8081
+
+          - path: /stats/api
+            pathType: Prefix
+            backend:
+              service:
+                name: stats-service
+                port:
+                  number: 8082
+          - path: /stats/actuator
+            pathType: Prefix
+            backend:
+              service:
+                name: stats-service
+                port:
+                  number: 8082
+
+          # --- Frontend Catch-All ---
+          # Matches everything else, including /users, /todos, /stats
           - path: /
             pathType: Prefix
             backend:
@@ -16,24 +68,3 @@ spec:
                 name: frontend
                 port:
                   number: 80
-          - path: /todos
-            pathType: Prefix
-            backend:
-              service:
-                name: todo-service
-                port:
-                  number: 8080
-          - path: /users
-            pathType: Prefix
-            backend:
-              service:
-                name: user-service
-                port:
-                  number: 8081
-          - path: /stats
-            pathType: Prefix
-            backend:
-              service:
-                name: stats-service
-                port:
-                  number: 8082
