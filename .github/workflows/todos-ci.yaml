@@ -1,0 +1,45 @@
+name: CI - Todos Service
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "backend/todos/**"
+
+jobs:
+  build-todos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend/todos
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/todo-backend-todos:${{ github.sha }}
+
+      - name: Update K8s Manifest
+        run: |
+          cd K8s
+          sed -i "s|image: .*todo-backend-todos:.*|image: ${{ secrets.DOCKER_USERNAME }}/todo-backend-todos:${{ github.sha }}|g" todos.yml
+          
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          
+          if [[ -n $(git status -s) ]]; then
+            git add todos.yml
+            git commit -m "Deploy: Update Todos Service image to ${{ github.sha }}"
+            git push
+          else
+            echo "No changes to commit."
+          fi
