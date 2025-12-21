@@ -62,7 +62,7 @@ function UserManagement() {
       console.error('Error fetching users:', error);
       setServiceStatus('offline');
       setErrorMessage(
-        '⚠️ User Service đang không khả dụng. Vui lòng thử lại sau.'
+        'User Service đang không hoạt động. Vui lòng thử lại sau.'
       );
       setUsers([]);
     }

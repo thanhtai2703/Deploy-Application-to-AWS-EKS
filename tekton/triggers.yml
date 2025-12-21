@@ -1,0 +1,87 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: github-actions-binding
+  namespace: default
+spec:
+  params:
+    - name: git-url
+      value: $(body.repository.url)
+    - name: commit-sha
+      value: $(body.commit_sha)
+    - name: branch
+      value: $(body.branch)
+    - name: service-name
+      value: $(body.service_name)
+    - name: context-dir
+      value: $(body.context_dir)
+    - name: manifest-file
+      value: $(body.manifest_file)
+    - name: image-repo
+      value: $(body.image_repo)
+
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: build-deploy-template
+  namespace: default
+spec:
+  params:
+    - name: git-url
+    - name: commit-sha
+    - name: branch
+    - name: service-name
+    - name: context-dir
+    - name: manifest-file
+    - name: image-repo
+
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: build-$(tt.params.service-name)-
+        namespace: default
+      spec:
+        pipelineRef:
+          name: build-and-deploy-pipeline
+        workspaces:
+          - name: shared-data
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 1Gi
+        params:
+          - name: git-url
+            value: $(tt.params.git-url)
+          - name: git-branch
+            value: $(tt.params.branch)
+          - name: context-dir
+            value: $(tt.params.context-dir)
+          - name: manifest-file
+            value: $(tt.params.manifest-file)
+          - name: image-name
+            value: harbor.harbor.svc.cluster.local/prod/$(tt.params.image-repo)
+          - name: image-tag
+            value: $(tt.params.commit-sha)
+
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: tekton-listener
+  namespace: default
+spec:
+  serviceAccountName: default
+  triggers:
+    - name: github-trigger
+      bindings:
+        - ref: github-actions-binding
+      template:
+        ref: build-deploy-template
+  resources:
+    kubernetesResource:
+      serviceType: LoadBalancer
