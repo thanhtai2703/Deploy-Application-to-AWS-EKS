@@ -1,0 +1,68 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: build-and-deploy
+  namespace: default
+spec:
+  params:
+    - name: repo-url
+      type: string
+    - name: branch-name
+      type: string
+      default: "main"
+    - name: context-dir
+      type: string
+      description: "The directory containing the Dockerfile (e.g., backend/todos)"
+    - name: manifest-file
+      type: string
+      description: "The K8s manifest to update (e.g., K8s/todos.yml)"
+    - name: image-name
+      type: string
+      description: "The target image name in Harbor (e.g., harbor.harbor.svc.cluster.local/prod/todo-service)"
+    - name: commit-sha
+      type: string
+      description: "The short SHA to tag the image with"
+
+  workspaces:
+    - name: shared-data
+
+  tasks:
+    - name: fetch-repo
+      taskRef:
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-data
+      params:
+        - name: url
+          value: $(params.repo-url)
+        - name: revision
+          value: $(params.branch-name)
+
+    - name: build-image
+      taskRef:
+        name: kaniko-build
+      runAfter:
+        - fetch-repo
+      workspaces:
+        - name: source
+          workspace: shared-data
+      params:
+        - name: IMAGE
+          value: "$(params.image-name):$(params.commit-sha)"
+        - name: CONTEXT
+          value: $(params.context-dir)
+    
+    - name: update-manifest
+      taskRef:
+        name: update-manifest
+      runAfter:
+        - build-image
+      workspaces:
+        - name: source
+          workspace: shared-data
+      params:
+        - name: manifest-file
+          value: $(params.manifest-file)
+        - name: new-image
+          value: "$(params.image-name):$(params.commit-sha)"

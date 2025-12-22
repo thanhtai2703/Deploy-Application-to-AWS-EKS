@@ -50,7 +50,7 @@ function StatsDashboard() {
       setServiceStatus('online');
       setErrorMessage('');
 
-      // Check if User Service is down (totalUsers = 0 might indicate this)
+      // Check if User Service is down //
       if (response.data.totalUsers === 0 && response.data.totalTodos > 0) {
         setUserServiceDown(true);
       } else {

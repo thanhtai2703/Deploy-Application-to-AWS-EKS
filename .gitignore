@@ -10,3 +10,12 @@ _override.tf
 _override.tf.json
 .terraform.lock.hcl
 .terraform.tfstate.lock.info
+
+# Tekton Secrets
+tekton-setup/secrets.yaml
+
+# Temporary Files
+patch.yaml
+input.txt
+output.txt
+harbor-values.yaml
