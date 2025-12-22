@@ -1,0 +1,28 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: tekton-selfsigned-issuer
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: tekton-triggers-ca
+  namespace: tekton-pipelines
+spec:
+  isCA: true
+  commonName: tekton-triggers-ca
+  secretName: tekton-triggers-ca-secret
+  issuerRef:
+    name: tekton-selfsigned-issuer
+    kind: ClusterIssuer
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: tekton-triggers-issuer
+  namespace: tekton-pipelines
+spec:
+  ca:
+    secretName: tekton-triggers-ca-secret
