@@ -1,0 +1,43 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: cd-template
+spec:
+  params:
+    - name: repository
+      description: The git repo
+    - name: branch
+      description: the branch for the git repo
+      default: main
+    - name: service-name
+      description: Name of the service to build (e.g., frontend, stats-service)
+    - name: action-type
+      description: The action to perform (e.g., build-deploy)
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: $(tt.params.service-name)-run-
+      spec:
+        serviceAccountName: pipeline
+        pipelineRef:
+          name: cd-pipeline
+        params:
+          - name: repository
+            value: $(tt.params.repository)
+          - name: branch
+            value: $(tt.params.branch)
+          - name: service-dir
+            value: $(tt.params.service-name)
+          - name: action
+            value: $(tt.params.action-type)
+        workspaces:
+          - name: shared-data
+            volumeClaimTemplate: 
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                storageClassName: gp2-csi
+                resources:
+                  requests:
+                    storage: 1Gi
