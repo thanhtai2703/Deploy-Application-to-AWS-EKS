@@ -8,10 +8,9 @@ spec:
     - name: repository
     - name: branch
     - name: commit_sha
-    - name: service_dir  # e.g., backend/todos
-    - name: manifest_file # e.g., K8s/todos.yml
-    - name: image_repo   # e.g., harbor.harbor.svc.cluster.local/prod/todo-service
-
+    - name: service_dir  
+    - name: manifest_file 
+    - name: image_repo   
   resourcetemplates:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun

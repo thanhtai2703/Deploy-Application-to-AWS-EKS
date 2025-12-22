@@ -66,6 +66,5 @@ spec:
           value: $(params.manifest-file)
         - name: new-image
           value: "$(params.image-name):$(params.commit-sha)"
-        # Pass the branch name explicitly
         - name: branch
           value: $(params.branch-name)

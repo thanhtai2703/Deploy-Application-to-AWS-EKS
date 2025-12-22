@@ -61,7 +61,7 @@ spec:
           
           # 3. Check for changes
           if git diff --quiet $(params.manifest-file); then
-            echo "✅ No changes to commit (Image already up to date)."
+            echo "No changes to commit (Image already up to date)."
             exit 0
           fi
           
@@ -72,14 +72,14 @@ spec:
           
           # 5. Push
           if git push origin HEAD:$(params.branch); then
-            echo "✅ Successfully pushed changes."
+            echo "Successfully pushed changes."
             exit 0
           fi
           
-          echo "⚠️ Push failed (likely race condition). Retrying..."
+          echo "Push failed (likely race condition). Retrying..."
           COUNT=$(($COUNT+1))
           sleep 3 # Random backoff would be better, but fixed is fine
         done
         
-        echo "❌ Failed to push after $MAX_RETRIES attempts."
+        echo "Failed to push after $MAX_RETRIES attempts."
         exit 1

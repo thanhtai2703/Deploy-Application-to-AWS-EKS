@@ -4,14 +4,12 @@ metadata:
   name: pipeline-role
   namespace: default
 rules:
-  # Permissions for the EventListener to work in the namespace
   - apiGroups: ["triggers.tekton.dev"]
     resources: ["eventlisteners", "triggerbindings", "triggertemplates", "triggers", "interceptors"]
     verbs: ["get", "list", "watch"]
   - apiGroups: [""]
     resources: ["configmaps", "secrets"]
     verbs: ["get", "list", "watch"]
-  # Permissions to create PipelineRuns
   - apiGroups: ["tekton.dev"]
     resources: ["pipelineruns", "pipelines", "tasks", "taskruns"]
     verbs: ["create", "get", "list", "watch"]
@@ -30,13 +28,11 @@ roleRef:
   kind: Role
   name: pipeline-role
 ---
-# CLUSTER WIDE PERMISSIONS
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: pipeline-cluster-role
 rules:
-  # Permissions to list cluster-wide resources
   - apiGroups: ["triggers.tekton.dev"]
     resources: ["clusterinterceptors", "clustertriggerbindings"]
     verbs: ["get", "list", "watch"]
