@@ -41,23 +41,45 @@ spec:
         
         cd $(workspaces.source.path)
         
-        # Setup remote with token
+        # Setup remote
         ORIGIN_URL=$(git remote get-url origin)
         REPO_PATH=${ORIGIN_URL#https://}
         git remote set-url origin https://${GITHUB_TOKEN}@${REPO_PATH}
         
-        # Pull latest changes explicitly from the target branch
-        echo "Pulling latest changes from $(params.branch)..."
-        git pull origin $(params.branch) --rebase
+        # RETRY LOOP FOR PUSHING
+        MAX_RETRIES=10
+        COUNT=0
         
-        # Update the file
-        echo "Updating $(params.manifest-file) with image $(params.new-image)"
-        sed -i "s|image: .*|image: $(params.new-image)|g" $(params.manifest-file)
+        while [ $COUNT -lt $MAX_RETRIES ]; do
+          # 1. Pull Latest
+          echo "Attempt $(($COUNT+1)): Pulling latest changes..."
+          git pull origin $(params.branch) --rebase
+          
+          # 2. Update File
+          echo "Updating $(params.manifest-file)..."
+          sed -i "s|image: .*|image: $(params.new-image)|g" $(params.manifest-file)
+          
+          # 3. Check for changes
+          if git diff --quiet $(params.manifest-file); then
+            echo "✅ No changes to commit (Image already up to date)."
+            exit 0
+          fi
+          
+          # 4. Commit
+          git add $(params.manifest-file)
+          # Use --allow-empty in case rebase handled it, though diff check handles most
+          git commit -m "Deploy: Update image to $(params.new-image)" || true
+          
+          # 5. Push
+          if git push origin HEAD:$(params.branch); then
+            echo "✅ Successfully pushed changes."
+            exit 0
+          fi
+          
+          echo "⚠️ Push failed (likely race condition). Retrying..."
+          COUNT=$(($COUNT+1))
+          sleep 3 # Random backoff would be better, but fixed is fine
+        done
         
-        # Commit
-        git add $(params.manifest-file)
-        git commit -m "Deploy: Update image to $(params.new-image)"
-        
-        # Push Explicitly to the branch
-        echo "Pushing to $(params.branch)..."
-        git push origin HEAD:$(params.branch)
+        echo "❌ Failed to push after $MAX_RETRIES attempts."
+        exit 1
