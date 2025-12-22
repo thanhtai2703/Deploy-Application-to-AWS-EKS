@@ -186,12 +186,20 @@ resource "aws_security_group" "sg-default" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Allow NLB to talk to NodePorts
+  # Allow Internal Traffic (Nodes talking to Nodes/NLB)
   ingress {
-    from_port   = 30000
-    to_port     = 32767
-    protocol    = "tcp"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["10.0.0.0/16"]
+  }
+
+  # Allow Traffic from NAT Gateway (Dynamic IP)
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["${aws_eip.nat.public_ip}/32"]
   }
 
   egress {

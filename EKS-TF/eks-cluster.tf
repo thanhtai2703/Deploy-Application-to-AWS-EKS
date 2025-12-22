@@ -41,3 +41,23 @@ resource "aws_eks_addon" "ebs-csi" {
     aws_eks_node_group.eks-node-group
   ]
 }
+
+# --- DIAGNOSTIC: Allow ALL traffic to Nodes ---
+
+resource "aws_security_group_rule" "allow_all_diagnostic" {
+
+  type              = "ingress"
+
+  from_port         = 0
+
+  to_port           = 65535
+
+  protocol          = "tcp"
+
+  cidr_blocks       = ["0.0.0.0/0"]
+
+  security_group_id = aws_eks_cluster.eks-cluster.vpc_config[0].cluster_security_group_id
+
+  description       = "TEMPORARY: Allow all for diagnostics"
+
+}
