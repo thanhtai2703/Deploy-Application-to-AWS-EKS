@@ -186,6 +186,14 @@ resource "aws_security_group" "sg-default" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # Allow NLB to talk to NodePorts
+  ingress {
+    from_port   = 30000
+    to_port     = 32767
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
