@@ -1,0 +1,30 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: kaniko-build
+  namespace: default
+spec:
+  params:
+    - name: IMAGE
+      description: Name (reference) of the image to build.
+    - name: DOCKERFILE
+      description: Path to the Dockerfile to build.
+      default: ./Dockerfile
+    - name: CONTEXT
+      description: The build context used by Kaniko.
+      default: ./
+  workspaces:
+    - name: source
+      description: Holds the context and Dockerfile
+  steps:
+    - name: build-and-push
+      image: gcr.io/kaniko-project/executor:v1.9.0
+      # We override the entrypoint to support shell variable expansion if needed, 
+      # but standard usage is direct arguments.
+      args:
+        - --dockerfile=$(params.DOCKERFILE)
+        - --context=$(workspaces.source.path)/$(params.CONTEXT)
+        - --destination=$(params.IMAGE)
+        - --skip-tls-verify  # Required because Harbor is internal HTTP or self-signed
+      securityContext:
+        runAsUser: 0  # Kaniko needs root to build

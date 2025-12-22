@@ -1,0 +1,15 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: cd-listener
+  namespace: default
+spec:
+  serviceAccountName: pipeline-sa
+  triggers:
+    - bindings:
+        - ref: cd-binding
+      template:
+        ref: cd-template
+  resources:
+    kubernetesResource:
+      serviceType: LoadBalancer

@@ -1,0 +1,62 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: update-manifest
+  namespace: default
+spec:
+  params:
+    - name: manifest-file
+      description: Path to the yaml file to update (e.g., K8s/todos.yml)
+    - name: new-image
+      description: The new image tag to insert
+    - name: git-email
+      default: "tekton@example.com"
+    - name: git-name
+      default: "Tekton Pipeline"
+  workspaces:
+    - name: source
+  steps:
+    - name: git-update
+      image: alpine/git:v2.36.3
+      env:
+        - name: GITHUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: github-token
+              key: token
+      script: |
+        #!/bin/sh
+        set -e
+        
+        # Configure Git
+        git config --global user.email "$(params.git-email)"
+        git config --global user.name "$(params.git-name)"
+        
+        # Navigate to source
+        cd $(workspaces.source.path)
+        
+        # Update the file using sed
+        # We look for 'image: .*' and replace it. 
+        # CAUTION: This assumes the file has only one 'image:' key or the one we want is identifiable.
+        # For better precision, we match the known image name structure if possible.
+        
+        echo "Updating $(params.manifest-file) with image $(params.new-image)"
+        sed -i "s|image: .*|image: $(params.new-image)|g" $(params.manifest-file)
+        
+        # Verify change
+        cat $(params.manifest-file) | grep "image:"
+        
+        # Commit and Push
+        git add $(params.manifest-file)
+        git commit -m "Deploy: Update image to $(params.new-image)"
+        
+        # Setup remote with token
+        # Assumes the repo was cloned via https
+        # We replace the origin to include the token
+        ORIGIN_URL=$(git remote get-url origin)
+        # Strip https://
+        REPO_PATH=${ORIGIN_URL#https://}
+        
+        git remote set-url origin https://${GITHUB_TOKEN}@${REPO_PATH}
+        
+        git push origin HEAD

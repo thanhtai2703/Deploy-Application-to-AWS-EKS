@@ -1,0 +1,47 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: cd-template
+  namespace: default
+spec:
+  params:
+    - name: repository
+    - name: branch
+    - name: commit_sha
+    - name: service_dir  # e.g., backend/todos
+    - name: manifest_file # e.g., K8s/todos.yml
+    - name: image_repo   # e.g., harbor.harbor.svc.cluster.local/prod/todo-service
+
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: build-deploy-run-
+        namespace: default
+      spec:
+        serviceAccountName: pipeline-sa
+        pipelineRef:
+          name: build-and-deploy
+        workspaces:
+          - name: shared-data
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 1Gi
+                storageClassName: gp2-csi
+        params:
+          - name: repo-url
+            value: $(tt.params.repository)
+          - name: branch-name
+            value: $(tt.params.branch)
+          - name: context-dir
+            value: $(tt.params.service_dir)
+          - name: manifest-file
+            value: $(tt.params.manifest_file)
+          - name: image-name
+            value: $(tt.params.image_repo)
+          - name: commit-sha
+            value: $(tt.params.commit_sha)

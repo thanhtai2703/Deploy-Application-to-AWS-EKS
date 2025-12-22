@@ -28,4 +28,11 @@ jobs:
         run: |
           curl -X POST http://${{ secrets.TEKTON_EL_URL }} \
             -H 'Content-Type: application/json' \
-            -d '{"repository": { "url": "https://github.com/thanhtai2703/Deploy-Application-to-AWS-EKS.git" }, "commit_sha": "${{ github.sha }}", "branch": "main", "service_name": "stats", "context_dir": "backend/stats-service", "manifest_file": "K8s/stats.yml", "image_repo": "stats-service" }'
+            -d '{
+              "repository": { "url": "${{ github.event.repository.clone_url }}" },
+              "ref": "main",
+              "sha": "${{ github.sha }}",
+              "service_dir": "backend/stats-service",
+              "manifest_file": "K8s/stats.yml",
+              "image_repo": "harbor.harbor.svc.cluster.local/prod/stats-service"
+            }'

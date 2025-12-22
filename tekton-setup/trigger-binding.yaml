@@ -1,0 +1,19 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: cd-binding
+  namespace: default
+spec:
+  params:
+    - name: repository
+      value: $(body.repository.url)
+    - name: branch
+      value: $(body.ref)
+    - name: commit_sha
+      value: $(body.sha)
+    - name: service_dir
+      value: $(body.service_dir)
+    - name: manifest_file
+      value: $(body.manifest_file)
+    - name: image_repo
+      value: $(body.image_repo)
