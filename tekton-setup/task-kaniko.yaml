@@ -19,12 +19,17 @@ spec:
   steps:
     - name: build-and-push
       image: gcr.io/kaniko-project/executor:v1.9.0
-      # We override the entrypoint to support shell variable expansion if needed, 
-      # but standard usage is direct arguments.
+      env:
+        - name: DOCKER_CONFIG
+          value: /tekton/creds/.docker
+      command:
+        - /kaniko/executor
       args:
         - --dockerfile=$(params.DOCKERFILE)
         - --context=$(workspaces.source.path)/$(params.CONTEXT)
         - --destination=$(params.IMAGE)
-        - --skip-tls-verify  # Required because Harbor is internal HTTP or self-signed
+        - --skip-tls-verify
+        - --insecure
+        - --insecure-pull
       securityContext:
-        runAsUser: 0  # Kaniko needs root to build
+        runAsUser: 0

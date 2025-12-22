@@ -22,6 +22,11 @@ spec:
         serviceAccountName: pipeline-sa
         pipelineRef:
           name: build-and-deploy
+        podTemplate:
+          securityContext:
+            fsGroup: 65532
+            runAsUser: 65532
+            runAsGroup: 65532
         workspaces:
           - name: shared-data
             volumeClaimTemplate:
