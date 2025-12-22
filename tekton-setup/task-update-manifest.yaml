@@ -6,9 +6,11 @@ metadata:
 spec:
   params:
     - name: manifest-file
-      description: Path to the yaml file to update (e.g., K8s/todos.yml)
+      description: Path to the yaml file to update
     - name: new-image
       description: The new image tag to insert
+    - name: branch
+      description: The branch to push to (e.g., main)
     - name: git-email
       default: "tekton@example.com"
     - name: git-name
@@ -24,39 +26,38 @@ spec:
             secretKeyRef:
               name: github-token
               key: token
+        - name: HOME
+          value: /workspace/source
       script: |
         #!/bin/sh
         set -e
+        
+        # Trust the directory
+        git config --global --add safe.directory $(workspaces.source.path)
         
         # Configure Git
         git config --global user.email "$(params.git-email)"
         git config --global user.name "$(params.git-name)"
         
-        # Navigate to source
         cd $(workspaces.source.path)
         
-        # Update the file using sed
-        # We look for 'image: .*' and replace it. 
-        # CAUTION: This assumes the file has only one 'image:' key or the one we want is identifiable.
-        # For better precision, we match the known image name structure if possible.
+        # Setup remote with token
+        ORIGIN_URL=$(git remote get-url origin)
+        REPO_PATH=${ORIGIN_URL#https://}
+        git remote set-url origin https://${GITHUB_TOKEN}@${REPO_PATH}
         
+        # Pull latest changes explicitly from the target branch
+        echo "Pulling latest changes from $(params.branch)..."
+        git pull origin $(params.branch) --rebase
+        
+        # Update the file
         echo "Updating $(params.manifest-file) with image $(params.new-image)"
         sed -i "s|image: .*|image: $(params.new-image)|g" $(params.manifest-file)
         
-        # Verify change
-        cat $(params.manifest-file) | grep "image:"
-        
-        # Commit and Push
+        # Commit
         git add $(params.manifest-file)
         git commit -m "Deploy: Update image to $(params.new-image)"
         
-        # Setup remote with token
-        # Assumes the repo was cloned via https
-        # We replace the origin to include the token
-        ORIGIN_URL=$(git remote get-url origin)
-        # Strip https://
-        REPO_PATH=${ORIGIN_URL#https://}
-        
-        git remote set-url origin https://${GITHUB_TOKEN}@${REPO_PATH}
-        
-        git push origin HEAD
+        # Push Explicitly to the branch
+        echo "Pushing to $(params.branch)..."
+        git push origin HEAD:$(params.branch)
