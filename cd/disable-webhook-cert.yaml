@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: config-triggers
-  namespace: tekton-pipelines
-data:
-  disable-webhook-cert-validation: "true"
