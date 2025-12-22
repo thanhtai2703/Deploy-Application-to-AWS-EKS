@@ -1,0 +1,31 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:  
+  name: cd-pipeline
+spec:
+  params:
+    - name: repository
+      description: "URL của repository GitHub"
+    - name: branch
+      default: "main"
+    - name: service-dir
+      description: "Tên thư mục của service (chỉ dùng để log trong giai đoạn này)"
+    - name: action
+      description: "Hành động thực hiện"
+  
+  workspaces:
+    - name: shared-data
+      description: "Nơi lưu trữ code sau khi clone"
+
+  tasks:
+    - name: fetch-repository
+      taskRef:
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-data
+      params:
+        - name: url
+          value: $(params.repository)
+        - name: branch
+          value: $(params.branch)

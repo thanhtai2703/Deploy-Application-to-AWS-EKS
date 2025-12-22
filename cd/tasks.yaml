@@ -1,0 +1,41 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: deploy
+spec:
+  params:
+    - name: repository-url
+      description: URL của kho mã nguồn
+      type: string
+    - name: branch-name
+      description: Nhánh git
+      type: string
+    - name: service-name
+      description: Thư mục service (frontend/backend)
+      type: string
+    - name: action-type
+      description: Hành động cần thực hiện
+      type: string
+    - name: message
+      description: Thông báo mặc định
+      type: string
+      default: "Bắt đầu tiến trình CD..."
+  steps:
+    - name: display-pipeline-info
+      image: alpine:3
+      script: |
+        #!/bin/sh
+        echo "==========================================="
+        echo "🚀 THÔNG TIN DEPLOY"
+        echo "==========================================="
+        echo "📦 Repo:    $(params.repository-url)"
+        echo "🌿 Branch:  $(params.branch-name)"
+        echo "📂 Service: $(params.service-name)"
+        echo "🛠️  Action:  $(params.action-type)"
+        echo "💬 Message: $(params.message)"
+        echo "==========================================="
+        
+        # Ví dụ logic sau này của bạn:
+        echo "Đang di chuyển vào thư mục: /$(params.service-name)"
+        # cd $(params.service-name)
+        # npm install && npm run build
