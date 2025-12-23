@@ -1,7 +1,8 @@
 # Stage 1: Build React
 FROM node:18-alpine as build
 WORKDIR /app
-COPY package.json .
+# Copy lock files to leverage cache
+COPY package.json pnpm-lock.yaml* ./
 RUN npm install
 COPY . .
 RUN npm run build
