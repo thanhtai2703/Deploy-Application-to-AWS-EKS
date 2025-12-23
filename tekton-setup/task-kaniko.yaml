@@ -35,5 +35,17 @@ spec:
         - --skip-tls-verify
         - --insecure
         - --insecure-pull
+        # --- Optimization: Caching ---
+        - --cache=true
+        - --cache-copy-layers=true
+        - --cache-run-layers=true
+      # --- Optimization: Resources ---
+      resources:
+        requests:
+          memory: "2Gi"
+          cpu: "1000m" # 1 CPU
+        limits:
+          memory: "4Gi"
+          cpu: "2000m" # 2 CPUs
       securityContext:
         runAsUser: 0
