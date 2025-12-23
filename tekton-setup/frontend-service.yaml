@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: prod
+  annotations:
+    # Annotation này giúp AWS tạo Load Balancer ở chế độ internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+spec:
+  selector:
+    app: frontend # Phải khớp với label 'app: frontend' trong Deployment của bạn
+  ports:
+    - protocol: TCP
+      port: 80         # Cổng của Load Balancer
+      targetPort: 80    # Cổng mà ứng dụng frontend đang lắng nghe bên trong container
+  type: LoadBalancer
+

@@ -1,17 +1,59 @@
-name: CI - Frontend Service
+name: CI-CD Pipeline
 
 on:
   push:
-    branches: ["main"]
-    paths:
-      - "frontend/**"
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  test-and-trigger:
+  security-scan:
+    name: Security & Lint Scan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false 
+      matrix:
+        tool: [super-linter, codeql, trivy]
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Super-Linter
+        if: matrix.tool == 'super-linter'
+        uses: github/super-linter@v5
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_JAVASCRIPT_ES: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run CodeQL Analysis
+        if: matrix.tool == 'codeql'
+        uses: github/codeql-action/init@v2
+        with:
+          languages: 'javascript'
+      
+      - name: Perform CodeQL Analysis
+        if: matrix.tool == 'codeql'
+        uses: github/codeql-action/analyze@v2
+
+      - name: Run Trivy Scan
+        if: matrix.tool == 'trivy'
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+
+  build-and-deploy:
+    needs: security-scan 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
