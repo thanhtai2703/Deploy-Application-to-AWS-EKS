@@ -18,9 +18,8 @@ prometheus:
           resources:
             requests:
               storage: 10Gi
-    # Allow Prometheus to scrape metrics from other namespaces
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
 
 alertmanager:
-  enabled: false # Optional: Disable to save resources if not using alerts yet
+  enabled: false

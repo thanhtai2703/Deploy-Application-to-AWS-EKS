@@ -12,7 +12,7 @@ _override.tf.json
 .terraform.tfstate.lock.info
 
 # Tekton Secrets
-tekton-setup/secrets.yaml
+tekton-pipeline/secrets.yaml
 
 # Temporary Files
 patch.yaml
