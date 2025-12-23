@@ -6,9 +6,6 @@ expose:
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
 
-# PHẢI CÓ DÒNG NÀY ĐỂ ĐĂNG NHẬP ĐƯỢC
 externalURL: http://k8s-harbor-harbor-e23646dd89-000fac67939de240.elb.us-east-1.amazonaws.com
 
-# Đảm bảo mật khẩu đồng nhất
 harborAdminPassword: "Harbor12345"
-

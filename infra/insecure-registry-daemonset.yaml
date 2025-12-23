@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: harbor-insecure-registry
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      name: harbor-insecure-registry
+  template:
+    metadata:
+      labels:
+        name: harbor-insecure-registry
+    spec:
+      hostPID: true
+      hostNetwork: true
+      containers:
+      - name: configure-containerd
+        image: busybox
+        command:
+          - sh
+          - -c
+          - |
+            mkdir -p /host/etc/containerd/certs.d/k8s-harbor-harbor-e23646dd89-000fac67939de240.elb.us-east-1.amazonaws.com
+            cat <<EOF > /host/etc/containerd/certs.d/k8s-harbor-harbor-e23646dd89-000fac67939de240.elb.us-east-1.amazonaws.com/hosts.toml
+            server = "http://k8s-harbor-harbor-e23646dd89-000fac67939de240.elb.us-east-1.amazonaws.com"
+
+            [host."http://k8s-harbor-harbor-e23646dd89-000fac67939de240.elb.us-east-1.amazonaws.com"]
+              capabilities = ["pull", "resolve", "push"]
+            EOF
+            systemctl restart containerd || true
+        volumeMounts:
+        - name: etc-containerd
+          mountPath: /host/etc/containerd
+      volumes:
+      - name: etc-containerd
+        hostPath:
+          path: /etc/containerd
+          type: Directory
+      restartPolicy: Always
