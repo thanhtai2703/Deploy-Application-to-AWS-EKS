@@ -1,34 +1,42 @@
-name: CI-CD Pipeline
+name: CI - Frontend Service
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
+    paths:
+      - "frontend/**" # Chỉ chạy khi push vào thư mục frontend
+
+permissions:
+  contents: read
+  security-events: write # Cần thiết cho CodeQL để ghi báo cáo
 
 jobs:
+  # Job quét mã nguồn - Chạy song song bằng Matrix
   security-scan:
     name: Security & Lint Scan
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false 
+      fail-fast: false
       matrix:
         tool: [super-linter, codeql, trivy]
-    
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # 1. Quét Lint (Code sạch) - Chỉ quét thư mục frontend
       - name: Run Super-Linter
         if: matrix.tool == 'super-linter'
         uses: github/super-linter@v5
         env:
           VALIDATE_ALL_CODEBASE: false
           VALIDATE_JAVASCRIPT_ES: true
+          # Chỉ định linter tập trung vào thư mục frontend
+          FILTER_REGEX_INCLUDE: .*frontend/.*
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # 2. Quét Bảo mật (CodeQL)
       - name: Run CodeQL Analysis
         if: matrix.tool == 'codeql'
         uses: github/codeql-action/init@v2
@@ -39,16 +47,19 @@ jobs:
         if: matrix.tool == 'codeql'
         uses: github/codeql-action/analyze@v2
 
+      # 3. Quét lỗ hổng thư viện (Trivy)
       - name: Run Trivy Scan
         if: matrix.tool == 'trivy'
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
+          scan-ref: 'frontend' # Chỉ quét trong thư mục frontend
           ignore-unfixed: true
           format: 'table'
           severity: 'CRITICAL,HIGH'
 
-  build-and-deploy:
+  # Job Build và Deploy - Chỉ chạy sau khi các Job quét xong
+  test-and-trigger:
     needs: security-scan 
     runs-on: ubuntu-latest
     steps:
