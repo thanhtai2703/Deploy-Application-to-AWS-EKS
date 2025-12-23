@@ -9,6 +9,5 @@ class TodosApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }
 /////
