@@ -17,7 +17,7 @@ interface StatsData {
   completionRate: number;
   totalUsers: number;
 }
-
+///////
 const getStatsApiUrl = () => {
   // @ts-ignore
   if (window.ENV && window.ENV.STATS_API_URL) {
