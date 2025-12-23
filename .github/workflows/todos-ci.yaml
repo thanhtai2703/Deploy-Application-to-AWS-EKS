@@ -36,5 +36,5 @@ jobs:
               "sha": "${{ github.sha }}",
               "service_dir": "backend/todos",
               "manifest_file": "K8s/todos.yml",
-              "image_repo": "k8s-harbor-harbor-e23646dd89-000fac67939de240.elb.us-east-1.amazonaws.com:80/prod/todo-service"
+              "image_repo": "k8s-harbor-harbor-e23646dd89-000fac67939de240.elb.us-east-1.amazonaws.com/prod/todo-service"
             }'
