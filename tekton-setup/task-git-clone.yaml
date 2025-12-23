@@ -20,7 +20,6 @@ spec:
       script: |
         #!/usr/bin/env sh
         set -e
-        # Dọn dẹp sạch sẽ workspace trước khi kéo code mới
         rm -rf $(workspaces.output.path)/*
         rm -rf $(workspaces.output.path)/.[!.]*
         echo "Đang clone branch [$(params.branch)] từ: $(params.url)"

@@ -48,7 +48,6 @@ spec:
         - name: source
           workspace: shared-data
       params:
-        # We still push with the TAG (:sha) so it's readable in Harbor UI
         - name: IMAGE
           value: "$(params.image-name):$(params.commit-sha)"
         - name: CONTEXT
@@ -65,7 +64,6 @@ spec:
       params:
         - name: manifest-file
           value: $(params.manifest-file)
-        # Here is the magic: Use DIGEST instead of TAG
         - name: new-image
           value: "$(params.image-name)@$(tasks.build-image.results.IMAGE_DIGEST)"
         - name: branch
