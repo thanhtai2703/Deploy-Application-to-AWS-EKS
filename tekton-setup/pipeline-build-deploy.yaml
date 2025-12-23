@@ -43,7 +43,7 @@ spec:
       taskRef:
         name: kaniko-build
       runAfter:
-        - fetch-repo
+        - fetch-repoS
       workspaces:
         - name: source
           workspace: shared-data
