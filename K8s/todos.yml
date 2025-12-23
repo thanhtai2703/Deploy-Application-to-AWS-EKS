@@ -40,7 +40,7 @@ spec:
                 topologyKey: "kubernetes.io/hostname"
       containers:
         - name: todo-service
-          image: k8s-harbor-harbor-e23646dd89-000fac67939de240.elb.us-east-1.amazonaws.com/prod/todo-service@sha256:c23ed586f0770ac2d2e8a826b66b6e762745765d3a2a01bdf4da5d0d263e2796
+          image: k8s-harbor-harbor-e23646dd89-000fac67939de240.elb.us-east-1.amazonaws.com/prod/todo-service@sha256:df36ee091b5ba036c7e73d69247c1757cebf6abe496fcd1c1dcc837250b4fd60
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
