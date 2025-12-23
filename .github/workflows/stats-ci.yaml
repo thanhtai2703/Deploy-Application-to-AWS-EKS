@@ -7,7 +7,40 @@ on:
       - "backend/stats-service/**"
 
 jobs:
+  security-scan:
+    name: Security & Lint Scan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tool: [super-linter, trivy]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Super-Linter
+        if: matrix.tool == 'super-linter'
+        uses: github/super-linter@v5
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_JAVASCRIPT_ES: true
+          FILTER_REGEX_INCLUDE: .*backend/stats-service/.*
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Trivy Scan
+        if: matrix.tool == 'trivy'
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: 'frontend' 
+          ignore-unfixed: true
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+
   test-and-trigger:
+    needs: security-scan 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
