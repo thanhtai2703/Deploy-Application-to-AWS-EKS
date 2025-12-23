@@ -8,8 +8,8 @@ helm repo add prometheus-community https://prometheus-community.github.io/helm-c
 helm repo update
 
 # 2. Install/Upgrade Monitoring Stack
-echo "Installing kube_prometheus_stack..."
-helm upgrade --install monitoring prometheus-community/kube_prometheus_stack \
+echo "Installing kube-prometheus-stack..."
+helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
   --namespace monitoring \
   --values monitoring-values.yaml \
   --timeout 15m0s
@@ -18,7 +18,7 @@ echo "------------------------------------------------------------"
 echo "✅ Monitoring Installation Started!"
 echo "------------------------------------------------------------"
 echo "Waiting for LoadBalancer URL for Grafana..."
-sleep 10
+sleep 30
 URL=$(kubectl get svc -n monitoring monitoring-grafana -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 
 echo "Grafana URL: http://$URL"
