@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class StatsController {
-//
+////
     private final StatsService statsService;
 
     @GetMapping("/stats")
