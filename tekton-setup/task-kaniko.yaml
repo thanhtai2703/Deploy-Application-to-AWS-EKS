@@ -16,6 +16,9 @@ spec:
   workspaces:
     - name: source
       description: Holds the context and Dockerfile
+  results:
+    - name: IMAGE_DIGEST
+      description: Digest of the image just built.
   steps:
     - name: build-and-push
       image: gcr.io/kaniko-project/executor:v1.9.0
@@ -28,6 +31,7 @@ spec:
         - --dockerfile=$(params.DOCKERFILE)
         - --context=$(workspaces.source.path)/$(params.CONTEXT)
         - --destination=$(params.IMAGE)
+        - --digest-file=$(results.IMAGE_DIGEST.path)
         - --skip-tls-verify
         - --insecure
         - --insecure-pull

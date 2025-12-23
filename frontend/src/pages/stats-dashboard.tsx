@@ -83,7 +83,7 @@ function StatsDashboard() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <BarChart3 className="w-8 h-8" />
-          Analytics Dashboard
+          Analytics Dashboard V2
         </h1>
         <div className="flex items-center gap-2">
           <div
