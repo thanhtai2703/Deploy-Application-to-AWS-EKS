@@ -40,7 +40,7 @@ spec:
                 topologyKey: "kubernetes.io/hostname"
       containers:
         - name: stats-service
-          image: k8s-harbor-harbor-e23646dd89-000fac67939de240.elb.us-east-1.amazonaws.com:80/prod/stats-service:0f367983d6a902cc0fa02a7b73920f8ceebcb6c7
+          image: k8s-harbor-harbor-e23646dd89-000fac67939de240.elb.us-east-1.amazonaws.com/prod/stats-service@sha256:59c2efb70a275fdc450ff1c37696a23819a0bc197abbc2aa65d91ac14806a5cb
           imagePullPolicy: Always
           ports:
             - containerPort: 8082
