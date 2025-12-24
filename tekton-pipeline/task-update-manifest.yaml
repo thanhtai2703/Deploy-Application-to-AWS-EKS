@@ -6,7 +6,7 @@ metadata:
 spec:
   params:
     - name: manifest-file
-      description: Path to the yaml file to update
+      description: Path to the yaml file relative to repo root (e.g., K8s/base/todos.yml)
     - name: new-image
       description: The new image tag to insert
     - name: branch
@@ -51,35 +51,30 @@ spec:
         COUNT=0
         
         while [ $COUNT -lt $MAX_RETRIES ]; do
-          # 1. Pull Latest
           echo "Attempt $(($COUNT+1)): Pulling latest changes..."
           git pull origin $(params.branch) --rebase
           
-          # 2. Update File
           echo "Updating $(params.manifest-file)..."
+          # Ensure we are editing the file in the new 'base' location
           sed -i "s|image: .*|image: $(params.new-image)|g" $(params.manifest-file)
           
-          # 3. Check for changes
           if git diff --quiet $(params.manifest-file); then
-            echo "No changes to commit (Image already up to date)."
+            echo "✅ No changes to commit."
             exit 0
           fi
           
-          # 4. Commit
           git add $(params.manifest-file)
-          # Use --allow-empty in case rebase handled it, though diff check handles most
-          git commit -m "Deploy: Update image to $(params.new-image)" || true
+          git commit -m "Deploy: Update image in base to $(params.new-image)" || true
           
-          # 5. Push
           if git push origin HEAD:$(params.branch); then
-            echo "Successfully pushed changes."
+            echo "✅ Successfully pushed changes to $(params.branch)."
             exit 0
           fi
           
-          echo "Push failed (likely race condition). Retrying..."
+          echo "⚠️ Push failed. Retrying..."
           COUNT=$(($COUNT+1))
-          sleep 3 # Random backoff would be better, but fixed is fine
+          sleep 3
         done
         
-        echo "Failed to push after $MAX_RETRIES attempts."
+        echo "❌ Failed to push after $MAX_RETRIES attempts."
         exit 1

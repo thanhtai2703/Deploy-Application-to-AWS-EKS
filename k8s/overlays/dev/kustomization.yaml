@@ -1,0 +1,14 @@
+namespace: dev
+
+resources:
+  - ../../base
+
+patches:
+  # Reduce replicas for Dev to save cost
+  - target:
+      kind: Deployment
+      name: .*
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
