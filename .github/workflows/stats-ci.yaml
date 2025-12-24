@@ -60,7 +60,7 @@ jobs:
           format: 'table'
           severity: 'CRITICAL,HIGH'
 
-  test-and-trigger:
+  trigger:
     needs: security-scan 
     runs-on: ubuntu-latest
     steps:
