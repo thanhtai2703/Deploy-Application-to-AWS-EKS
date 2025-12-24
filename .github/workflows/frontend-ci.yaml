@@ -73,6 +73,6 @@ jobs:
               "ref": "main",
               "sha": "${{ github.sha }}",
               "service_dir": "frontend",
-              "manifest_file": "K8s/base/frontend.yml",
+              "manifest_file": "k8s/base/frontend.yml",
               "image_repo": "k8s-harbor-harbor-e23646dd89-000fac67939de240.elb.us-east-1.amazonaws.com/prod/frontend"
             }'

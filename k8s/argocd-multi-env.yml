@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/thanhtai2703/Deploy-Application-to-AWS-EKS.git
     targetRevision: HEAD
-    path: K8s/overlays/dev
+    path: k8s/overlays/dev
   destination:
     server: https://kubernetes.default.svc
     namespace: dev
@@ -29,7 +29,7 @@ spec:
   source:
     repoURL: https://github.com/thanhtai2703/Deploy-Application-to-AWS-EKS.git
     targetRevision: HEAD
-    path: K8s/overlays/staging
+    path: k8s/overlays/staging
   destination:
     server: https://kubernetes.default.svc
     namespace: staging
@@ -50,7 +50,7 @@ spec:
   source:
     repoURL: https://github.com/thanhtai2703/Deploy-Application-to-AWS-EKS.git
     targetRevision: HEAD
-    path: K8s/overlays/prod
+    path: k8s/overlays/prod
   destination:
     server: https://kubernetes.default.svc
     namespace: prod
