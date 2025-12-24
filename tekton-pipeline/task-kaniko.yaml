@@ -35,18 +35,5 @@ spec:
         - --skip-tls-verify
         - --insecure
         - --insecure-pull
-<<<<<<< HEAD
-=======
-        - --cache=true
-        - --cache-copy-layers=true
-        - --cache-run-layers=true
-      resources:
-        requests:
-          memory: "3Gi"
-          cpu: "2000m" # 2 CPUs
-        limits:
-          memory: "4Gi"
-          cpu: "2000m" # 2 CPUs
->>>>>>> fc1680515d17d40f9ece7ccaada9f9e36823fa86
       securityContext:
         runAsUser: 0

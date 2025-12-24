@@ -1,12 +1,16 @@
-name: CI - Stats Service
+iagname: CI - Stats Service
 
 on:
   push:
     branches: ["main"]
     paths:
       - "backend/stats-service/**"
-
-
+    paths-ignore:
+      - "**.md"
+      - "**.txt"
+    paths-ignore:
+      - "**.md"
+      - "**.txt"
 
 jobs:
   test:
