@@ -5,9 +5,8 @@ on:
     branches: ["main"]
     paths:
       - "backend/user-service/**"
-    paths-ignore:
-      - "**.md"
-      - "**.txt"
+      - "!backend/user-service/**.md"
+      - "!backend/user-service/**.txt"
 
 jobs:
   test:

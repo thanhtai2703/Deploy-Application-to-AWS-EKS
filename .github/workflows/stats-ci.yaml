@@ -5,12 +5,8 @@ on:
     branches: ["main"]
     paths:
       - "backend/stats-service/**"
-    paths-ignore:
-      - "**.md"
-      - "**.txt"
-    paths-ignore:
-      - "**.md"
-      - "**.txt"
+      - "!backend/stats-service/**.md"
+      - "!backend/stats-service/**.txt"
 
 jobs:
   test:
