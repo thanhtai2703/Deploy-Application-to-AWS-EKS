@@ -26,8 +26,8 @@ jobs:
           npm run build
         working-directory: frontend
 
-        
   security-scan:
+    needs: test
     name: Security & Lint Scan
     runs-on: ubuntu-latest
     strategy:
