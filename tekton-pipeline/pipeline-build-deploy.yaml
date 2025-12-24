@@ -48,12 +48,11 @@ spec:
         - name: source
           workspace: shared-data
       params:
-        # We still push with the TAG (:sha) so it's readable in Harbor UI
         - name: IMAGE
           value: "$(params.image-name):$(params.commit-sha)"
         - name: CONTEXT
           value: $(params.context-dir)
-    
+
     - name: update-manifest
       taskRef:
         name: update-manifest

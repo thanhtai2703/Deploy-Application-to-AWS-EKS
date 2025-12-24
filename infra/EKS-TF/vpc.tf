@@ -17,9 +17,6 @@ resource "aws_internet_gateway" "igw" {
     Name = var.igw-name
   }
 }
-
-# --- PUBLIC SUBNETS ---
-
 # Create public subnet 1
 resource "aws_subnet" "public-subnet" {
   vpc_id                  = aws_vpc.vpc.id
@@ -47,9 +44,6 @@ resource "aws_subnet" "public-subnet2" {
     "kubernetes.io/cluster/${var.cluster-name}" = "shared"
   }
 }
-
-# --- PRIVATE SUBNETS ---
-
 # Create private subnet 1
 resource "aws_subnet" "private-subnet" {
   vpc_id                  = aws_vpc.vpc.id
@@ -77,9 +71,6 @@ resource "aws_subnet" "private-subnet2" {
     "kubernetes.io/cluster/${var.cluster-name}" = "shared"
   }
 }
-
-# --- NETWORKING (NAT GATEWAY) ---
-
 # Elastic IP for NAT Gateway
 resource "aws_eip" "nat" {
   domain = "vpc"
@@ -88,7 +79,7 @@ resource "aws_eip" "nat" {
   }
 }
 
-# NAT Gateway (Lives in Public Subnet 1)
+# NAT Gateway
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
   subnet_id     = aws_subnet.public-subnet.id
@@ -99,8 +90,6 @@ resource "aws_nat_gateway" "nat" {
 
   depends_on = [aws_internet_gateway.igw]
 }
-
-# --- ROUTING ---
 
 # Route Table for Public Subnets
 resource "aws_route_table" "public" {
@@ -126,7 +115,7 @@ resource "aws_route_table_association" "public2" {
   subnet_id      = aws_subnet.public-subnet2.id
 }
 
-# Route Table for Private Subnets (Through NAT)
+# Route Table for Private Subnets
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.vpc.id
   route {
@@ -186,7 +175,7 @@ resource "aws_security_group" "sg-default" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Allow Internal Traffic (Nodes talking to Nodes/NLB)
+  # Allow Internal Traffic
   ingress {
     from_port   = 0
     to_port     = 0
@@ -194,7 +183,7 @@ resource "aws_security_group" "sg-default" {
     cidr_blocks = ["10.0.0.0/16"]
   }
 
-  # Allow Traffic from NAT Gateway (Dynamic IP)
+  # Allow Traffic from NAT Gateway
   ingress {
     from_port   = 0
     to_port     = 0

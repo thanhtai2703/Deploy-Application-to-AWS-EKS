@@ -6,18 +6,15 @@ metadata:
 spec:
   project: default
   source:
-    # --- UPDATE THIS TO YOUR REPO URL ---
     repoURL: https://github.com/thanhtai2703/Deploy-Application-to-AWS-EKS.git
     targetRevision: HEAD
     path: K8s
   destination:
     server: https://kubernetes.default.svc
-    # Since our YAMLs define namespaces (prod/databases),
-    # we can set a default here but the YAMLs will override.
     namespace: default
   syncPolicy:
     automated:
-      prune: true # Automatically delete old resources
-      selfHeal: true # Correct manual changes back to Git state
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
