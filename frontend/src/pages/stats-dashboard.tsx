@@ -17,7 +17,7 @@ interface StatsData {
   completionRate: number;
   totalUsers: number;
 }
-
+///////
 const getStatsApiUrl = () => {
   // @ts-ignore
   if (window.ENV && window.ENV.STATS_API_URL) {
@@ -105,7 +105,6 @@ function StatsDashboard() {
           </span>
         </div>
       </div>
-
       {/* Error Message */}
       {errorMessage && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
@@ -126,8 +125,7 @@ function StatsDashboard() {
           </div>
         </div>
       )}
-
-      {/* User Service Warning */}
+      {/* User Service Warning//////// */}
       {userServiceDown && (
         <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2">
           <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
@@ -141,7 +139,6 @@ function StatsDashboard() {
           </div>
         </div>
       )}
-
       {serviceStatus === 'offline' ? (
         <div className="text-center py-20 text-gray-500">
           <AlertCircle className="w-20 h-20 mx-auto mb-4 text-red-400" />

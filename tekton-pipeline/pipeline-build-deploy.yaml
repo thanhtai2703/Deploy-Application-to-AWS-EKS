@@ -52,7 +52,7 @@ spec:
           value: "$(params.image-name):$(params.commit-sha)"
         - name: CONTEXT
           value: $(params.context-dir)
-    
+
     - name: update-manifest
       taskRef:
         name: update-manifest

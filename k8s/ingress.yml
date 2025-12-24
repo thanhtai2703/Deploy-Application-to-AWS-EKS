@@ -58,9 +58,6 @@ spec:
                 name: stats-service
                 port:
                   number: 8082
-
-          # --- Frontend Catch-All ---
-          # Matches everything else, including /users, /todos, /stats
           - path: /
             pathType: Prefix
             backend:
