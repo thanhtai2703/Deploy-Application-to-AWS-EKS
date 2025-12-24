@@ -1,0 +1,8 @@
+resources:
+  - frontend.yml
+  - todos.yml
+  - users.yml
+  - stats.yml
+  - postgres.yml
+  - hpa.yml
+  - ingress.yml

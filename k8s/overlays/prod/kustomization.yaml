@@ -1,0 +1,14 @@
+namespace: prod
+
+resources:
+  - ../../base
+
+patches:
+  # Ensure high availability for Prod
+  - target:
+      kind: Deployment
+      name: (frontend|todo-service|user-service|stats-service)
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
