@@ -35,11 +35,9 @@ spec:
         - --skip-tls-verify
         - --insecure
         - --insecure-pull
-        # --- Optimization: Caching ---
         - --cache=true
         - --cache-copy-layers=true
         - --cache-run-layers=true
-      # --- Optimization: Resources ---
       resources:
         requests:
           memory: "3Gi"
