@@ -23,7 +23,7 @@ public class StatsController {
             StatsResponse stats = statsService.getOverallStats();
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
-            return ResponseEntity.status(503).build(); // Service Unavailable
+            return ResponseEntity.status(503).build();
         }
     }
     @GetMapping("/health")
