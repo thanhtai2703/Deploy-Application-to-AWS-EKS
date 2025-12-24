@@ -7,8 +7,27 @@ on:
       - "backend/user-service/**"
 
 jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: maven
+
+      - name: Build and Run Tests
+        run: mvn test
+        working-directory: backend/user-service
+
   security-scan:
     name: Security & Lint Scan
+    needs: test
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -39,23 +58,10 @@ jobs:
           format: 'table'
           severity: 'CRITICAL,HIGH'
 
-  test-and-trigger:
+  trigger:
     needs: security-scan
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
-        with:
-          java-version: "21"
-          distribution: "temurin"
-          cache: maven
-
-      - name: Build and Run Tests
-        run: mvn test
-        working-directory: backend/user-service
 
       - name: Trigger Tekton Pipeline
         run: |

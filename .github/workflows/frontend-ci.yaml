@@ -8,7 +8,26 @@ on:
 
 
 jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install and Build
+        run: |
+          npm install
+          npm run build
+        working-directory: frontend
+
   security-scan:
+    needs: test
     name: Security & Lint Scan
     runs-on: ubuntu-latest
     strategy:
@@ -40,24 +59,10 @@ jobs:
           format: 'table'
           severity: 'CRITICAL,HIGH'
 
-  test-and-trigger:
+  trigger:
     needs: security-scan 
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-
-      - name: Install and Build
-        run: |
-          npm install
-          npm run build
-        working-directory: frontend
-
       - name: Trigger Tekton Pipeline
         run: |
           curl -X POST http://${{ secrets.TEKTON_EL_URL }} \

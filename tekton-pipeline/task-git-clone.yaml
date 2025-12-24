@@ -20,9 +20,8 @@ spec:
       script: |
         #!/usr/bin/env sh
         set -e
-        # Dọn dẹp sạch sẽ workspace trước khi kéo code mới
         rm -rf $(workspaces.output.path)/*
         rm -rf $(workspaces.output.path)/.[!.]*
-        echo "🚀 Đang clone branch [$(params.branch)] từ: $(params.url)"
+        echo "Đang clone branch [$(params.branch)] từ: $(params.url)"
         git clone --depth 1 -b $(params.branch) $(params.url) $(workspaces.output.path)
-        echo "✅ Clone thành công!"
+        echo "Clone thành công!"

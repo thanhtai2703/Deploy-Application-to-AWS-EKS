@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class StatsController {
-////
+
     private final StatsService statsService;
 
     @GetMapping("/stats")
@@ -23,11 +23,11 @@ public class StatsController {
             StatsResponse stats = statsService.getOverallStats();
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
-            return ResponseEntity.status(503).build(); // Service Unavailable
+            return ResponseEntity.status(503).build();
         }
     }
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("Stats Service is running V3");
     }
-}///////////
+}

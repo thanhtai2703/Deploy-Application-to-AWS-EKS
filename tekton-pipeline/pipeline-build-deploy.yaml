@@ -43,7 +43,7 @@ spec:
       taskRef:
         name: kaniko-build
       runAfter:
-        - fetch-repo
+        - fetch-repoS
       workspaces:
         - name: source
           workspace: shared-data
@@ -64,7 +64,6 @@ spec:
       params:
         - name: manifest-file
           value: $(params.manifest-file)
-        # Here is the magic: Use DIGEST instead of TAG
         - name: new-image
           value: "$(params.image-name)@$(tasks.build-image.results.IMAGE_DIGEST)"
         - name: branch
