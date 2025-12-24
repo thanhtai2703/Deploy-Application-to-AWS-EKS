@@ -5,6 +5,8 @@ on:
     branches: ["main"]
     paths:
       - "backend/user-service/**"
+      - "!backend/user-service/**.md"
+      - "!backend/user-service/**.txt"
 
 jobs:
   test:
@@ -52,17 +54,16 @@ jobs:
         if: matrix.tool == 'trivy'
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: 'frontend' 
+          scan-type: "fs"
+          scan-ref: "frontend"
           ignore-unfixed: true
-          format: 'table'
-          severity: 'CRITICAL,HIGH'
+          format: "table"
+          severity: "CRITICAL,HIGH"
 
   trigger:
     needs: security-scan
     runs-on: ubuntu-latest
     steps:
-
       - name: Trigger Tekton Pipeline
         run: |
           curl -X POST http://${{ secrets.TEKTON_EL_URL }} \
