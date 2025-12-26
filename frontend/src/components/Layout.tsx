@@ -17,7 +17,7 @@ function Layout() {
             <div className="flex items-center gap-2">
               <ListTodo className="w-6 h-6 text-blue-600" />
               <h1 className="text-xl font-bold text-gray-800">
-                Todo Application V13
+                Todo Application V14
               </h1>
             </div>
             <div className="flex gap-1">
