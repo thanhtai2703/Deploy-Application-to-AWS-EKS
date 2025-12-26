@@ -6,3 +6,13 @@ resources:
   - postgres.yml
   - hpa.yml
   - ingress.yml
+
+replicas:
+  - name: frontend
+    count: 1
+  - name: todo-service
+    count: 1
+  - name: user-service
+    count: 1
+  - name: stats-service
+    count: 1
