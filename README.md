@@ -1,94 +1,123 @@
-Prerequisites
-Ensure you have these installed and configured:
+# Microservices Deployment on AWS EKS Through DevOps pipeline: "Todo Application"
 
-- AWS CLI (aws configure with your credentials).
-- Terraform (v1.3+).
-- Kubectl.
-- Helm.
-- Git Bash (Recommended for Windows to run .sh scripts) or a Linux terminal.
+## This project demonstrates a production-grade, secure, and fully automated **GitOps** pipeline on AWS EKS. It features a private networking architecture, internal image registry, cluster-native CI/CD, and full observability.
 
----
+## Architecture Overview
 
-Phase 1: Infrastructure Provisioning
-Create the S3 bucket for state, then the EKS cluster, VPC, and Nodes.
+### 1. 🌍 Infrastructure (AWS & Terraform)
 
-1.  Bootstrap Remote Backend (One-time only):
-    1 cd EKS-TF/backend-setup
-    2 terraform init
-    3 terraform apply --auto-approve
-    (Creates S3 bucket `todo-terraform-state-...` and DynamoDB table).
+- **VPC:** Custom VPC with **Private** and **Public** subnets.
+- **Security:**
+  - **Worker Nodes:** Run in **Private Subnets** (No Public IPs). Secure from the internet.
+  - **Public Access:** Via **Application Load Balancers (ALB)** in Public Subnets.
+  - **Outbound:** Private nodes access the internet via **NAT Gateway**.
+- **Compute:** AWS EKS Cluster with `t3.large` Node Group (Auto-Scaling enabled).
 
-2.  Provision EKS Cluster:
-    1 cd ../ # Go back to EKS-TF root
-    2 terraform init
-    3 terraform apply -var-file="variables.tfvars" --auto-approve
-    (Wait ~15-20 mins. This sets up EKS, OIDC, and IAM roles).
+### 2. Networking & Access
 
-3.  Connect `kubectl` to Cluster:
-
-1 aws eks update-kubeconfig --region us-east-1 --name ToDo-EKS-Cluster
+- **Ingress:** AWS Application Load Balancer (ALB) routes traffic to the Frontend and Microservices.
+- **Tools Access:** Dedicated Load Balancers for Ops tools:
+  - **Harbor:** Private Image Registry.
+  - **ArgoCD:** GitOps Controller.
+  - **Tekton:** CI Event Listener.
+  - **Grafana:** Monitoring Dashboard.
 
 ---
 
-Phase 2: Install Kubernetes Controllers
-Install the AWS Load Balancer Controller so your Ingress works.
+## Prerequisites
 
-1.  Run Installation Script:
-    1 cd .. # Go back to project root
-    2 bash install_alb.sh
-    (This installs the controller using Helm and links it to the Terraform IAM role).
-
----
-
-Phase 3: CI/CD Setup (GitHub)
-Configure GitHub to build your Docker images automatically.
-
-1.  Add Repository Secrets:
-    Go to Settings > Secrets and variables > Actions and add:
-
-    - DOCKER_USERNAME: Your Docker Hub username.
-    - DOCKER_PASSWORD: Your Docker Hub password/token.
-    - GIT_TOKEN: A GitHub Personal Access Token (repo scope) to allow the pipeline to commit changes.
-
-2.  Trigger Build:
-    Commit and push your code to the main branch.
-    1 git add .
-    2 git commit -m "Initial Deploy"
-    3 git push origin main
-    _ Wait for the "Microservices Build & Deploy" Action to finish (Green ✅).
-    _ Why? The pipeline updates the YAML files in K8s/ with the correct image tags.
+- **AWS CLI** (`aws configure`)
+- **Terraform** (v1.3+)
+- **Kubectl**
+- **Helm** (v3+)
 
 ---
 
-Phase 4: Deploy Applications
-Deploy the Database and Services to the cluster.
+## Setup Guide
 
-1.  Pull Latest Manifests:
-    Since the pipeline updated your YAML files, pull them down:
-    1 git pull origin main
+### Phase 1: Infrastructure Provisioning
 
-2.  Create Namespaces & Storage Class:
+Create the secure network and cluster.
 
-1 kubectl apply -f K8s/namespaces.yml
-2 kubectl apply -f K8s/storage-class.yml
+1.  **Initialize Backend:**
+    ```bash
+    cd EKS-TF/backend-setup
+    terraform init && terraform apply --auto-approve
+    ```
+2.  **Deploy EKS Cluster:**
+    ```bash
+    cd ../
+    terraform init
+    terraform apply -var-file variable.tfvars --auto-approve
+    ```
+3.  **Connect Kubectl:**
+    ```bash
+    aws eks update-kubeconfig --region us-east-1 --name ToDo-EKS-Cluster
+    ```
 
-3.  Deploy Database (StatefulSet):
-    1 kubectl apply -f K8s/postgres.yml
-    Wait for it to run: kubectl get pods -n databases -w
+### Phase 2: System Components Installation
 
-4.  Deploy Backend & Frontend:
-    1 kubectl apply -f K8s/
+Install the critical "Ops" software.
+
+1.  **Install AWS Load Balancer Controller:**
+    ```bash
+    ./infra/install_alb.sh
+    ```
+2.  **Install Harbor (Registry):**
+    ```bash
+    # Ensure you create the 'prod' project in Harbor UI after installation.
+    # Default Pass: Harbor12345
+    ```
+3.  **Install Monitoring (Prometheus/Grafana):**
+    ```bash
+    ./infra/install_monitoring.sh
+    ```
+4.  **Install ArgoCD:**
+    ```bash
+    ./infra/install_argocd.sh
+    ```
+
+### Phase 3: Configure CI/CD (Tekton)
+
+Deploy the build pipeline.
+
+1.  **Configure Secrets:**
+    Edit `tekton-pipeline/secrets.yaml` with your **GitHub Token** and **Harbor Password**.
+2.  **Apply Pipeline:**
+
+    ```bash
+    # Install Git-Clone Task
+    kubectl apply -f https://raw.githubusercontent.com/tektoncd/catalog/main/task/git-clone/0.9/git-clone.yaml
+
+    # Deploy Custom Pipeline
+    kubectl apply -f tekton-pipeline/
+    ```
+
+3.  **Expose Listener:**
+    ```bash
+    kubectl annotate service el-cd-listener service.beta.kubernetes.io/aws-load-balancer-scheme=internet-facing --overwrite
+    ```
+4.  **Connect GitHub:**
+    - Get the Listener URL: `kubectl get svc el-cd-listener`
+    - Add secret `TEKTON_EL_URL` to GitHub Repository Secrets.
+
+### Phase 4: Deploy Applications (GitOps)
+
+We use **Kustomize** for multi-environment deployment.
+
+1.  **Create Namespaces:**
+    ```bash
+    kubectl apply -f k8s/namespaces.yml
+    ```
+2.  **Configure ArgoCD:**
+    Connect ArgoCD to your Git repo and point it to the overlays:
+    - **Dev App:** `k8s/overlays/dev` -> Namespace `dev`
+    - **Prod App:** `k8s/overlays/prod` -> Namespace `prod`
 
 ---
 
-Phase 5: Access the Application
+## Monitoring & Maintenance
 
-1.  Get the URL:
-    1 kubectl get ingress -n prod
-    Copy the ADDRESS (e.g., `k8s-prod-todoingr-xxxx.us-east-1.elb.amazonaws.com`).
-
-2.  Open in Browser:
-    Paste the address. You should see the Todo App.
-
-    - Test: Create a new user, then login and create a Todo task.
-    - Stats: Visit /stats to see the analytics dashboard.
+- **Grafana:** View Node/Pod health. Login with `admin` / (See secret).
+- **Harbor:** Manage Docker images.
+- **ArgoCD:** View deployment status.
